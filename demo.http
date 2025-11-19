@@ -1,4 +1,4 @@
-###
+### Create new contribution
 POST http://localhost:8080/contributions?username=dirk
 Content-Type: application/json
 
@@ -17,8 +17,33 @@ Content-Type: application/json
 }
 
 > {%
-    client.global.set("saved_contribution_id", response.body)
+    client.global.set("contribution_id", response.body)
 %}
 
-###
-GET http://localhost:8080/contributions/{{ saved_contribution_id }}
+### Get the new contribution
+GET http://localhost:8080/contributions/{{ contribution_id }}
+
+### Like the contribution
+POST http://localhost:8080/contributions/{{ contribution_id }}/like?username=jelmer
+
+### Reply to the contribution
+POST http://localhost:8080/contributions/{{ contribution_id }}/reply?username=koen
+Content-Type: application/json
+
+{
+    "spans": [
+        {
+            "type": "STYLED_TEXT",
+            "text": "Hello "
+        },
+        {
+            "type": "MENTION",
+            "username": "dirk"
+        }
+    ]
+}
+
+> {% client.global.set("reply_id", response.body) %}
+
+### Like the reply
+POST http://localhost:8080/contributions/{{ contribution_id }}/replies/{{ reply_id }}/like?username=dirk

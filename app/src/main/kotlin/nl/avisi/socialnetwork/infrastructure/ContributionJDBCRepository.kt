@@ -66,14 +66,28 @@ class ContributionJDBCRepository(
             post.creationTime,
             json.encodeToString(post.content)
         )
+
+        insertLikes(post)
     }
 
     private fun updatePost(post: Post) {
         jdbcTemplate.update(
             "update post set contents = ? where id = ?",
             json.encodeToString(post.content),
-            post.id
+            post.id.asUUID()
         )
+        jdbcTemplate.update("delete from \"like\" where post_id = ?", post.id.asUUID())
+        insertLikes(post)
+    }
+
+    private fun insertLikes(post: Post) {
+        post.likes.forEach {
+            jdbcTemplate.update(
+                "INSERT INTO \"like\" (post_id, username) VALUES (?, ?)",
+                post.id.asUUID(),
+                it.toString()
+            )
+        }
     }
 
     private fun postExists(postID: PostID): Boolean =
@@ -99,13 +113,24 @@ class ContributionJDBCRepository(
         ).singleOrNull() ?: return null
 
         jdbcTemplate.query(
-            "select * from post where contribution_id = ? and ordering > 0",
+            "select * from \"like\" where post_id = ?",
+            { rs, _ -> contribution.likedBy(Username(rs.getString("username"))) },
+            contribution.openingPost.id.asUUID()
+        )
+
+        jdbcTemplate.query(
+            "select * from post where contribution_id = ? and ordering > 0 order by ordering",
             { rs ->
-                contribution.newReply(
+                val reply = contribution.newReply(
                     PostID(rs.getObject("id", UUID::class.java)),
                     Username(rs.getString("author")),
                     rs.getObject("time", OffsetDateTime::class.java),
                     json.decodeFromString(rs.getString("contents"))
+                )
+                jdbcTemplate.query(
+                    "select * from \"like\" where post_id = ?",
+                    { rs, _ -> contribution.replyLikedBy(reply.id, Username(rs.getString("username"))) },
+                    reply.id.asUUID()
                 )
             },
             contribution.id.asUUID()

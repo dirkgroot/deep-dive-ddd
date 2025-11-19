@@ -14,17 +14,36 @@ enum class TextSpanType {
 
 data class TextSpanModel(
     val type: TextSpanType,
-    val text: String?,
-    val bold: Boolean?,
-    val italic: Boolean?,
-    val url: String?,
-    val username: String?,
-    val tagName: String?
-)
+    val text: String? = null,
+    val bold: Boolean? = null,
+    val italic: Boolean? = null,
+    val url: String? = null,
+    val username: String? = null,
+    val tagName: String? = null
+) {
+    companion object {
+        fun of(span: TextSpan): TextSpanModel =
+            when (span) {
+                is StyledText -> TextSpanModel(TextSpanType.STYLED_TEXT, span.text, span.bold, span.italic)
+                is Link -> TextSpanModel(TextSpanType.LINK, span.text.text, span.text.bold, span.text.italic, span.url)
+                is Mention -> TextSpanModel(TextSpanType.MENTION, username = span.username.toString())
+                is Tag -> TextSpanModel(TextSpanType.TAG, tagName = span.name)
+            }
+    }
+}
 
 data class RichTextModel(
     val spans: List<TextSpanModel>,
-)
+) {
+    companion object {
+        fun of(content: RichText): RichTextModel =
+            RichTextModel(
+                content.spans.map {
+                    TextSpanModel.of(it)
+                }
+            )
+    }
+}
 
 fun RichTextModel.asRichText(): RichText =
     RichText(spans.map { it.asTextSpan() })

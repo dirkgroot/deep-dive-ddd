@@ -16,13 +16,15 @@ class Post private constructor(
             Post(postID, time, author, content)
     }
 
-    private val likes: MutableSet<Username> = mutableSetOf()
+    private val likedBy: MutableSet<Username> = mutableSetOf()
 
     var content: RichText = content
         private set
 
+    val likes: Set<Username> get() = likedBy.toSet()
+
     internal fun likedBy(username: Username) {
-        likes.add(username)
+        likedBy.add(username)
     }
 
     internal fun edit(newContent: RichText) {

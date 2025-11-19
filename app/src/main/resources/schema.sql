@@ -12,3 +12,9 @@ create table post
     time            timestamp                         not null,
     contents        varchar                           not null
 );
+
+create table "like"
+(
+    post_id  uuid references post (id) not null,
+    username varchar                   not null
+);
