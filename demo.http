@@ -20,8 +20,11 @@ Content-Type: application/json
     client.global.set("contribution_id", response.body)
 %}
 
-### Get the new contribution
-GET http://localhost:8080/contributions/{{ contribution_id }}
+### View the contribution
+GET http://localhost:8080/contributions/{{ contribution_id }}?username=koen
+
+### View the contribution blocked user
+GET http://localhost:8080/contributions/{{ contribution_id }}?username=stefan
 
 ### Like the contribution
 POST http://localhost:8080/contributions/{{ contribution_id }}/like?username=jelmer

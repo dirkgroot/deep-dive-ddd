@@ -3,8 +3,11 @@ package nl.avisi.socialnetwork.application
 import nl.avisi.socialnetwork.domain.contribution.Contribution
 import nl.avisi.socialnetwork.domain.contribution.ContributionID
 import nl.avisi.socialnetwork.domain.contribution.ContributionRepository
+import nl.avisi.socialnetwork.domain.contribution.ContributionVisibilityService
 import nl.avisi.socialnetwork.domain.contribution.PostID
+import nl.avisi.socialnetwork.domain.user.UserRepository
 import nl.avisi.socialnetwork.domain.user.Username
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -19,8 +22,11 @@ import java.util.UUID
 @RestController
 @RequestMapping("/contributions")
 class ContributionController(
-    private val repository: ContributionRepository
+    private val repository: ContributionRepository,
+    userRepository: UserRepository
 ) {
+    private val contributionVisibilityService = ContributionVisibilityService(userRepository)
+
     @PostMapping
     fun newContribution(username: String, @RequestBody content: RichTextModel): ResponseEntity<UUID> {
         val postContent = content.asRichText()
@@ -35,13 +41,15 @@ class ContributionController(
     }
 
     @GetMapping("/{id}")
-    fun findByID(@PathVariable id: String): ResponseEntity<ContributionModel> {
+    fun findByID(@PathVariable id: String, @RequestParam username: String): ResponseEntity<ContributionModel> {
         val contribution = repository.findByID(ContributionID(UUID.fromString(id)))
 
         return if (contribution == null)
             ResponseEntity.notFound().build()
-        else
+        else if (contributionVisibilityService.canView(Username(username), contribution))
             ResponseEntity.ok(ContributionModel.of(contribution))
+        else
+            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
     }
 
     @PostMapping("/{id}/like")
