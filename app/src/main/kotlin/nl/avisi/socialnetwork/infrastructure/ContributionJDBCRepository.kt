@@ -2,11 +2,7 @@ package nl.avisi.socialnetwork.infrastructure
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 import nl.avisi.socialnetwork.domain.contribution.*
-import nl.avisi.socialnetwork.domain.richtext.*
 import nl.avisi.socialnetwork.domain.user.Username
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
@@ -17,18 +13,6 @@ import java.util.*
 class ContributionJDBCRepository(
     private val jdbcTemplate: JdbcTemplate
 ) : ContributionRepository {
-    private val module = SerializersModule {
-        polymorphic(TextSpan::class) {
-            subclass(StyledText::class)
-            subclass(Link::class)
-            subclass(Mention::class)
-            subclass(Tag::class)
-        }
-    }
-    private val json = Json {
-        serializersModule = module
-    }
-
     override fun nextContributionID(): ContributionID =
         ContributionID(UUID.randomUUID())
 
@@ -64,7 +48,7 @@ class ContributionJDBCRepository(
             ordering,
             post.author.toString(),
             post.creationTime,
-            json.encodeToString(post.content)
+            Json.encodeToString(post.content)
         )
 
         insertLikes(post)
@@ -73,7 +57,7 @@ class ContributionJDBCRepository(
     private fun updatePost(post: Post) {
         jdbcTemplate.update(
             "update post set contents = ? where id = ?",
-            json.encodeToString(post.content),
+            Json.encodeToString(post.content),
             post.id.asUUID()
         )
         jdbcTemplate.update("delete from \"like\" where post_id = ?", post.id.asUUID())
@@ -106,7 +90,7 @@ class ContributionJDBCRepository(
                     PostID(rs.getObject("id", UUID::class.java)),
                     Username(rs.getString("author")),
                     rs.getObject("time", OffsetDateTime::class.java),
-                    json.decodeFromString(rs.getString("contents"))
+                    Json.decodeFromString(rs.getString("contents"))
                 )
             },
             contributionID.asUUID()
@@ -125,7 +109,7 @@ class ContributionJDBCRepository(
                     PostID(rs.getObject("id", UUID::class.java)),
                     Username(rs.getString("author")),
                     rs.getObject("time", OffsetDateTime::class.java),
-                    json.decodeFromString(rs.getString("contents"))
+                    Json.decodeFromString(rs.getString("contents"))
                 )
                 jdbcTemplate.query(
                     "select * from \"like\" where post_id = ?",
