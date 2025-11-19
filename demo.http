@@ -1,0 +1,24 @@
+###
+POST http://localhost:8080/contributions?username=dirk
+Content-Type: application/json
+
+{
+    "spans": [
+        {
+            "type": "STYLED_TEXT",
+            "text": "Hello World!\n",
+            "bold": true
+        },
+        {
+            "type": "TAG",
+            "tagName": "hdp"
+        }
+    ]
+}
+
+> {%
+    client.global.set("saved_contribution_id", response.body)
+%}
+
+###
+GET http://localhost:8080/contributions/{{ saved_contribution_id }}
