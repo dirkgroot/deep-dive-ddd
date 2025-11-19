@@ -32,8 +32,7 @@ class ContributionController(
         return ResponseEntity.ok(contribution.id.asUUID())
     }
 
-    @GetMapping
-    @RequestMapping("/{id}")
+    @GetMapping("/{id}")
     fun findByID(@PathVariable id: String): ResponseEntity<Contribution> {
         val contribution = repository.findByID(ContributionID(UUID.fromString(id)))
 
