@@ -13,7 +13,7 @@ create table post
     contents        varchar                           not null
 );
 
-create table "like"
+create table post_liked_by
 (
     post_id  uuid references post (id) not null,
     username varchar                   not null

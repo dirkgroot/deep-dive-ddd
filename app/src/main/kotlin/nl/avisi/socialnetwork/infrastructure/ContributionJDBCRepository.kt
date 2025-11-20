@@ -60,14 +60,14 @@ class ContributionJDBCRepository(
             Json.encodeToString(post.content),
             post.id.asUUID()
         )
-        jdbcTemplate.update("delete from \"like\" where post_id = ?", post.id.asUUID())
+        jdbcTemplate.update("delete from post_liked_by where post_id = ?", post.id.asUUID())
         insertLikes(post)
     }
 
     private fun insertLikes(post: Post) {
         post.likes.forEach {
             jdbcTemplate.update(
-                "INSERT INTO \"like\" (post_id, username) VALUES (?, ?)",
+                "INSERT INTO post_liked_by (post_id, username) VALUES (?, ?)",
                 post.id.asUUID(),
                 it.toString()
             )
@@ -97,7 +97,7 @@ class ContributionJDBCRepository(
         ).singleOrNull() ?: return null
 
         jdbcTemplate.query(
-            "select * from \"like\" where post_id = ?",
+            "select * from post_liked_by where post_id = ?",
             { rs, _ -> contribution.likedBy(Username(rs.getString("username"))) },
             contribution.openingPost.id.asUUID()
         )
@@ -112,7 +112,7 @@ class ContributionJDBCRepository(
                     Json.decodeFromString(rs.getString("contents"))
                 )
                 jdbcTemplate.query(
-                    "select * from \"like\" where post_id = ?",
+                    "select * from post_liked_by where post_id = ?",
                     { rs, _ -> contribution.replyLikedBy(reply.id, Username(rs.getString("username"))) },
                     reply.id.asUUID()
                 )
