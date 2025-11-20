@@ -6,12 +6,16 @@ Content-Type: application/json
     "spans": [
         {
             "type": "STYLED_TEXT",
-            "text": "Hello World!\n",
+            "text": "Hello!\n",
             "bold": true
         },
         {
+            "type": "STYLED_TEXT",
+            "text": "I'm currently talking about "
+        },
+        {
             "type": "TAG",
-            "tagName": "hdp"
+            "tagName": "ddd"
         }
     ]
 }
@@ -23,7 +27,7 @@ Content-Type: application/json
 ### View the contribution
 GET http://localhost:8080/contributions/{{ contribution_id }}?username=koen
 
-### View the contribution blocked user
+### View the contribution by blocked user
 GET http://localhost:8080/contributions/{{ contribution_id }}?username=stefan
 
 ### Like the contribution
