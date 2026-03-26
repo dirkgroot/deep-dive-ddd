@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="demo | Create new contribution" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" nameIsGenerated="true" path="$PROJECT_DIR$/demo.http" executionIdentifier="Create new contribution" runType="Run single request">
+    <method v="2" />
+  </configuration>
+</component>
