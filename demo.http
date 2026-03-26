@@ -27,9 +27,6 @@ Content-Type: application/json
 ### View the contribution
 GET http://localhost:8080/contributions/{{ contribution_id }}?username=koen
 
-### View the contribution by blocked user
-GET http://localhost:8080/contributions/{{ contribution_id }}?username=stefan
-
 ### Like the contribution
 POST http://localhost:8080/contributions/{{ contribution_id }}/like?username=jelmer
 
@@ -54,3 +51,6 @@ Content-Type: application/json
 
 ### Like the reply
 POST http://localhost:8080/contributions/{{ contribution_id }}/replies/{{ reply_id }}/like?username=dirk
+
+### View the contribution by blocked user
+GET http://localhost:8080/contributions/{{ contribution_id }}?username=stefan
