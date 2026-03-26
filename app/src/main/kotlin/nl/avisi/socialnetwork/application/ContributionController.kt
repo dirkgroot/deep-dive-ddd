@@ -56,46 +56,49 @@ class ContributionController(
     fun like(
         @PathVariable id: String,
         @RequestParam username: String
-    ): ResponseEntity<Unit> =
-        repository.findByID(ContributionID(UUID.fromString(id)))
-            ?.let {
-                it.likedBy(Username(username))
-                repository.update(it)
-                ResponseEntity.ok().build()
-            }
-            ?: ResponseEntity.notFound().build()
+    ): ResponseEntity<Unit> {
+        val contribution = repository.findByID(ContributionID(UUID.fromString(id)))
+            ?: return ResponseEntity.notFound().build()
+
+        contribution.likedBy(Username(username))
+        repository.update(contribution)
+
+        return ResponseEntity.ok().build()
+    }
 
     @PostMapping("/{id}/reply")
     fun reply(
         @PathVariable id: String,
         @RequestParam username: String,
         @RequestBody content: RichTextModel
-    ): ResponseEntity<UUID> =
-        repository.findByID(ContributionID(UUID.fromString(id)))
-            ?.let {
-                val postContent = content.asRichText()
-                val reply = it.newReply(
-                    repository.nextPostID(),
-                    Username(username),
-                    OffsetDateTime.now(),
-                    postContent
-                )
-                repository.update(it)
-                ResponseEntity.ok(reply.id.asUUID())
-            }
-            ?: ResponseEntity.notFound().build()
+    ): ResponseEntity<UUID> {
+        val contribution = repository.findByID(ContributionID(UUID.fromString(id)))
+            ?: return ResponseEntity.notFound().build()
+
+        val postContent = content.asRichText()
+        val reply = contribution.newReply(
+            repository.nextPostID(),
+            Username(username),
+            OffsetDateTime.now(),
+            postContent
+        )
+        repository.update(contribution)
+
+        return ResponseEntity.ok(reply.id.asUUID())
+    }
 
     @PostMapping("/{id}/replies/{replyId}/like")
     fun likeReply(
         @PathVariable id: String,
         @PathVariable replyId: String,
         @RequestParam username: String
-    ): ResponseEntity<Unit> =
-        repository.findByID(ContributionID(UUID.fromString(id)))
-            ?.let {
-                it.replyLikedBy(PostID(UUID.fromString(replyId)), Username(username))
-                repository.update(it)
-                ResponseEntity.ok().build()
-            }
-            ?: ResponseEntity.notFound().build()
+    ): ResponseEntity<Unit> {
+        val contribution = repository.findByID(ContributionID(UUID.fromString(id)))
+            ?: return ResponseEntity.notFound().build()
+
+        contribution.replyLikedBy(PostID(UUID.fromString(replyId)), Username(username))
+        repository.update(contribution)
+
+        return ResponseEntity.ok().build()
+    }
 }
